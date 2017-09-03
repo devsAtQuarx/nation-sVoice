@@ -543,7 +543,7 @@ export default {
             }
         })
       }else{
-        //user is not logged in 
+        //user is not logged in
       }
 
     },
