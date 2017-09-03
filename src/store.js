@@ -5,10 +5,11 @@ import Firebase from 'firebase'
 Vue.use(Vuex)
 
 export const store = new Vuex.Store({
+
+  //state
   state:{
     isLoggedIn : false,
-    userDetail : {},
-    redirect : true
+    userDetail : {}
   },
   getters:{
     isLoggedIn: state =>{
@@ -18,15 +19,20 @@ export const store = new Vuex.Store({
       return state.userDetail
     }
   },
+
+  //mutations
   mutations : {
+
+    //loggin funv
     fbLogIn(){
       var provider = new Firebase.auth.FacebookAuthProvider()
       Firebase.auth().signInWithRedirect(provider)
-      Firebase.auth().getRedirectResult().then(function(result) {
+      Firebase.auth().getRedirectResult()
+      .then(function(result) {
         if (result.credential) {
           // This gives you a Facebook Access Token. You can use it to access the Facebook API.
           var token = result.credential.accessToken;
-          console.log(token);
+          //console.log(token);
           // ...
         }
         // The signed-in user info.
@@ -42,6 +48,8 @@ export const store = new Vuex.Store({
         // ...
       })
     },
+
+    //logout func
     fbLogOut(){
       Firebase.auth().signOut().then(function() {
       // Sign-out successful.

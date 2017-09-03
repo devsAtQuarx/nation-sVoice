@@ -1,139 +1,182 @@
 <template>
   <span id="main-home">
 
+    <!-- scrollToTop -->
+    <v-btn fab dark class="feedback indigo" @click="scrollToTop()">
+      <i class="material-icons">&#xE5CE;</i>
+    </v-btn>
 
+    <!-- TabComponent -->
+    <v-tabs dark fixed centered id='home' v-if="news_arr.length >=2" >
 
-  <v-btn fab dark class="feedback indigo" @click="scrollToTop()">
-    <i class="material-icons">&#xE5CE;</i>
-  </v-btn>
+      <!-- tab selector -->
+      <v-tabs-bar slot="activators" class="cyan">
+        <v-tabs-slider class="yellow"></v-tabs-slider>
+        <v-tabs-item
+          v-for="i in news_arr"
+          :key="i.id"
+          :href="'#tab-' + i.id"
+        >
+          {{ i.id }}
+        </v-tabs-item>
+      </v-tabs-bar>
 
-  <!-- TabComponent -->
-  <v-tabs dark fixed centered id='home' v-if="news_arr.length >=2" >
-
-    <!-- tab selector -->
-    <v-tabs-bar slot="activators" class="cyan">
-      <v-tabs-slider class="yellow"></v-tabs-slider>
-      <v-tabs-item
-        v-for="i in news_arr"
+      <!-- content -->
+      <!-- main arr -> news_arr => 1)top 2)latest-->
+      <v-tabs-content
+        v-for="(i,index_new_arr) in news_arr"
         :key="i.id"
-        :href="'#tab-' + i.id"
+        :id="'tab-' + i.id"
       >
-        {{ i.id }}
-      </v-tabs-item>
-    </v-tabs-bar>
+        <!-- news cardd -->
+        <v-layout v-for="(j,index_articles) in i.articles" >
+          <v-flex xs12 sm8 offset-sm2 >
+            <v-card>
 
-    <!-- content -->
-    <v-tabs-content
-      v-for="i in news_arr"
-      :key="i.id"
-      :id="'tab-' + i.id"
-    >
-    <v-layout v-for="j in i.articles" >
-     <v-flex xs12 sm8 offset-sm2 >
-      <v-card >
-        <v-card-media :src="j.a.urlToImage" height="300px">
-        </v-card-media>
-        <v-card-title primary-title>
-          <div>
-            <h3 class="headline mb-0">{{j.a.title}}</h3>
-            <div>
-              <span class="true-value-count" v-if="j.trueCountValue!=null">
-                <v-chip outline class="grey black--text chip-auth">
-                  Authenticated by
-                  <span class="trueCountText">
-                    {{j.trueCountValue}}
+              <!-- news photo -->
+              <v-card-media :src="j.a.urlToImage" height="300px">
+              </v-card-media>
+
+              <!-- card body-->
+              <v-card-title primary-title>
+                <div>
+
+                  <!-- news title-->
+                  <h3 class="headline mb-0">
+                    {{j.a.title}}
+                  </h3>
+
+                  <div>
+                    <span class="true-value-count" v-if="j.trueCountValue!=null">
+                        <v-chip outline class="grey black--text chip-auth">
+                            Authenticated by
+                            <span class="trueCountText">
+
+                              <!-- authCount -->
+                              {{j.trueCountValue}}
+
+                            </span>
+                        </v-chip>
+                    </span>
+
+                    <br>
+
+                    <!-- news desc-->
+                    {{j.a.description}}
+
+                  </div>
+
+                  <!-- computed, doesnot reflect anything on dom, work from behind -->
+                  <!--span>{{queryTrueCount}}</span-->
+
+                </div>
+              </v-card-title>
+
+              <!--card footer-->
+              <v-card-actions>
+
+                <!-- auth but -->
+                <v-btn
+                  :loading="loading"
+
+                  @click.native.stop=
+                    "loader = 'loading';
+                      dialog = true;
+                      trueCount(i.id, j.k)"
+
+
+                  class="primary dark white--text auth_but"
+                  :class="j.isTrueStatusInDb"
+                >
+
+                  <!-- show grey but -->
+                  <span v-if="j.isTrueStatusInDb=='grey'">
+                    Authenticate
+                    <i class="material-icons thmb-icon" >&#xE8DC;</i>
                   </span>
-                </v-chip>
-              </span>
-              <br>
-              {{j.a.description}}
-            </div>
 
-            <!-- computed, doesnot reflect anything on dom, work from behind -->
-            <span>{{queryTrueCount}}</span>
+                  <!-- show blue but-->
+                  <span v-if="j.isTrueStatusInDb=='blue'">
+                    Authenticated by You
+                    <i class="material-icons thmb-icon" >&#xE8DC;</i>
+                  </span>
 
-         </div>
-       </v-card-title>
-        <v-card-actions>
-          <v-btn
-            :loading="loading3"
-            @click.native.stop="loader = 'loading3';dialog = true;
-              trueCount(i.id, j.k)"
-            :disabled="loading3"
-            class="primary dark white--text auth_but"
-            :class="j.isTrueStatusInDb"
-          >
-            <span v-if="j.isTrueStatusInDb=='grey'">
+                </v-btn>
 
-              Authenticate
-              <i class="material-icons thmb-icon" >&#xE8DC;</i>
-            </span>
-            <span v-if="j.isTrueStatusInDb=='blue'">
+                <!--see detail button -->
+                <v-btn flat class="orange--text auth_but" :href="j.a.url" >
+                  See Detail
+                  <i class="material-icons">&#xE315;</i>
+                </v-btn>
 
-              Authenticated by You
-              <i class="material-icons thmb-icon" >&#xE8DC;</i>
-            </span>
+              </v-card-actions>
+            </v-card>
 
-          </v-btn>
+            <br><!-- space between cards -->
 
-          <v-btn flat class="orange--text auth_but" :href="j.a.url" >
-            See Detail
-            <i class="material-icons">&#xE315;</i>
-          </v-btn>
-        </v-card-actions>
-
-
-
-      </v-card>
-      <br>
-
-     </v-flex>
-    </v-layout>
-    <v-btn block secondary dark v-show="i.id=='top'"
-      @click="loadMore(i.id, i.articles[c].k); c+=3" class="load-more-but">
-      <span  >
-        Load More ...
-      </span>
-    </v-btn>
-
-    <v-btn block secondary dark v-show="i.id=='latest'"
-      @click="loadMore(i.id, i.articles[c2].k); c2+=3" class="load-more-but">
-      <span  >
-        Load More ...
-      </span>
-    </v-btn>
-
-   </v-tabs-content>
-
-    <!-- Dialog-->
-    <v-dialog v-model="dialog" v-if="!isLoggedIn">
-      <v-card>
-        <v-card-title class="headline headline-dialog dialog-header-home">
-          You are not LoggedIn !
-        </v-card-title>
-        <v-card-text>
-
-        <v-layout row>
-          <v-flex xs10 offset-xs1>
-            <v-btn transparent dark @click.native="dialog = false;fbLogIn()" v-show="!isLoggedIn"
-              class="logInBut"><img src="https://png.icons8.com/facebook/color/24"
-               title="Facebook" width="24" height="24">Sign In with Facebook
-            </v-btn>
           </v-flex>
-        </v-layout>
+        </v-layout><!-- newscard ends -->
 
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn class="grey--text darken-1"
-            flat="flat" @click.native="dialog = false">Close</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+        <!-- load more but => top -->
+        <v-btn block secondary dark v-show="i.id=='top'"
+          @click="loadMore(i.id, i.articles[c].k); c+=3" class="load-more-but">
+          <span  >
+            Load More ...
+          </span>
+        </v-btn>
 
-  </v-tabs>
+        <!-- load more but => latest -->
+        <v-btn block secondary dark v-show="i.id=='latest'"
+          @click="loadMore(i.id, i.articles[c2].k); c2+=3" class="load-more-but">
+          <span  >
+            Load More ...
+          </span>
+        </v-btn>
+
+     </v-tabs-content><!-- tab content ends -->
+
+
+      <!-- Dialog-->
+      <v-dialog v-model="dialog" v-if="!isLoggedIn">
+        <v-card>
+
+          <!-- head/title dialog-->
+          <v-card-title class="headline headline-dialog dialog-header-home">
+            You are not LoggedIn !
+          </v-card-title>
+
+          <!-- dialog body -->
+          <v-card-text>
+          <v-layout row>
+            <v-flex xs10 offset-xs1>
+
+              <!-- fb but -->
+              <v-btn transparent dark @click.native="dialog = false;fbLogIn()" v-show="!isLoggedIn"
+                class="logInBut"><img src="https://png.icons8.com/facebook/color/24"
+                 title="Facebook" width="24" height="24">Sign In with Facebook
+              </v-btn>
+
+            </v-flex>
+          </v-layout>
+          </v-card-text>
+
+          <!-- dialog foot-->
+          <v-card-actions>
+            <v-spacer></v-spacer>
+
+            <!-- close but-->
+            <v-btn class="grey--text darken-1"
+              flat="flat" @click.native="dialog = false">Close</v-btn>
+
+          </v-card-actions>
+
+        </v-card>
+      </v-dialog>
+
+    </v-tabs>
   </span>
 </template>
+
 
 <script>
 import {db} from '../firebase'
@@ -142,36 +185,46 @@ import {mapGetters} from 'vuex'
 
 export default {
   name: 'home',
+
+  //data
   data () {
     return {
-      news_arr : [],
-      c: 0,
+      news_arr : [], // main arr
+      c: 0, //load more
       c2: 0,
       dialog: false,
       loader: null,
-      loading3: false,
+      loading: false,
     }
   },
+
+
+  //methods
   methods:{
+
+    //mapMutations
     ...mapMutations([
       'fbLogIn','fbLogOut'
     ]),
+
+    //scrollToTop
     scrollToTop(){
       window.scrollTo(0, 0)
     },
+
+    //getNews
     getNews(){
-      //TopNews
+
+      //*************TopNews************/
       this.$http.get('https://newsapi.org/v1/articles?source=the-times-of-india&sortBy=top&apiKey=b0a290260ac4478c98e35da0f5ca7d4a')
       .then(response=>{
         let topNews = response.body
         //console.log(topNews)
 
-        //extract news & save in firebase
-        let top = []
+        //extract news
         for(let i in topNews.articles){
           //console.log(topNews.articles[i])
           //console.log(topNews.articles[i].title)
-          top.push(topNews.articles[i])
 
           //fetch id
           //console.log(topNews.articles[i].url.lastIndexOf('/'))
@@ -179,18 +232,19 @@ export default {
           //console.log(topNews.articles[i].url.slice(topNews.articles[i].url.lastIndexOf('/')+1,
             //topNews.articles[i].url.lastIndexOf('.')))
 
-          //firebase set
+          //extract unique news no
           if(topNews.articles[i].url.lastIndexOf('.cms')!=-1){
+            //firebase set in db
             db.ref('top/' + topNews.articles[i].url.slice(topNews.articles[i].url.lastIndexOf('/')+1,
               topNews.articles[i].url.lastIndexOf('.'))).set(topNews.articles[i])
           }
-        }
+        }//for ends
 
         //retrieveTop
         this.retrieveTop()
 
 
-        //LatestNews
+        //************* LatestNews ***************/
         this.$http.get('https://newsapi.org/v1/articles?source=the-times-of-india&sortBy=latest&apiKey=b0a290260ac4478c98e35da0f5ca7d4a')
         .then(response=>{
           let latestNews = response.body
@@ -227,6 +281,8 @@ export default {
       })
 
     },
+
+    //retrieveTop
     retrieveTop(){
 
       let vm =this
@@ -238,8 +294,9 @@ export default {
         //console.log(Object.keys(snapshot.val()))
 
         //console.log(k)
+        let c=0
         for(let k in snapshot.val()){
-
+          c++
           //console.log(snapshot.val()[k])
           let a = snapshot.val()[k]
 
@@ -257,16 +314,31 @@ export default {
               }
               //console.log(k)
 
-              //pack
-              let topObj = {
-                k,
-                a,
-                isTrueStatusInDb
-              }
-              //console.log(topObj)
-              topArr.push(topObj)
+              //trueCount
+              db.ref('trueCount/'+k+'/'+
+                'trueCountNo').once('value',function(snapshot3){
+                //console.log(vm.news_arr[z].articles[z1].k+ " " +snapshot.val())
+                let trueCountValue = snapshot3.val()
+
+                //logic
+                if(trueCountValue == null)
+                  trueCountValue = 0
+
+
+                  //pack
+                  let topObj = {
+                    k,
+                    a,
+                    isTrueStatusInDb,
+                    trueCountValue
+                  }
+
+                  //console.log(topObj)
+                  topArr.push(topObj)
+
+              })
           })
-        }
+        }//for end
 
       })
 
@@ -279,6 +351,8 @@ export default {
       this.news_arr.push(top_obj) //dom arr
 
     },
+
+    //retrieveLatest
     retrieveLatest(){
 
       let vm =this
@@ -307,15 +381,29 @@ export default {
               }
               //console.log(k)
 
-              //pack
-              let latestObj = {
-                k,
-                a,
-                isTrueStatusInDb
-              }
+              //trueCount
+              db.ref('trueCount/'+k+'/'+
+                'trueCountNo').once('value',function(snapshot3){
+                //console.log(vm.news_arr[z].articles[z1].k+ " " +snapshot.val())
+                let trueCountValue = snapshot3.val()
 
-              //push
-              latestArr.push(latestObj)
+                //logic
+                if(trueCountValue == null)
+                  trueCountValue = 0
+
+
+                  //pack
+                  let latestObj = {
+                    k,
+                    a,
+                    isTrueStatusInDb,
+                    trueCountValue
+                  }
+
+                  //push
+                  latestArr.push(latestObj)
+
+              })
           })
         }
 
@@ -330,20 +418,36 @@ export default {
       this.news_arr.push(latest_obj) //dom arr
 
     },
+
+    //true Count - auth
     trueCount(newsType ,k){
-      console.log(k)
-      console.log(newsType)
+      //console.log(k)
+      //console.log(newsType)
       let vm = this
 
+      //if Logged in
       if(this.$store.state.isLoggedIn == true){
         //console.log("close")
         this.dialog = false
 
+        //button preloader starts
+        const l=this.loader
+        this[l]=!this[l]
+
         //increase True Count
-        console.log(this.$store.state.userDetail.uid)
+        //console.log(this.$store.state.userDetail.uid)
 
 
-        //before push , check id in Db
+        /****** logic like *******/
+        //check => if user like ? yes or no
+          //yes) => A) old count - 1
+
+          //no) => A)if count is null(means news id not in db) ??? yes or no
+                        //a)yes -> count = 1
+                        //b)no -> old count + 1
+
+
+        //before push , check uid in Db
         db.ref('trueCount/' + '/' + k + '/' +
           vm.$store.state.userDetail.uid).once('value',function(snapshot){
             console.log(snapshot.val())
@@ -351,12 +455,13 @@ export default {
             //if uid is not in Db
             if(snapshot.val() == null){ //no there , Add
 
-              console.log("Add")
+              //console.log("Add")
               let trueCountInDb
-              db.ref('trueCount/' + '/' + k + '/' + 'trueCountNo').once('value', function(snapshot){
-                console.log("True Count No: "+snapshot.val())
+              db.ref('trueCount/' + '/' + k + '/' + 'trueCountNo').once('value',
+                function(snapshot){ //get Old true count
+                //console.log("True Count No: "+snapshot.val())
 
-                //if there is atleast 1 comment
+                //if there is atleast 1 like
                 if(snapshot.val() != null ){
                     trueCountInDb = snapshot.val() + 1
                 }else{  // if null
@@ -383,6 +488,11 @@ export default {
                       }else if(vm.news_arr[z].articles[z1].isTrueStatusInDb == 'blue'){
                         vm.news_arr[z].articles[z1].isTrueStatusInDb = 'grey'
                       }
+                      vm.news_arr[z].articles[z1].trueCountValue = trueCountInDb
+
+                      //button preloader ends
+                      vm[l] = false
+                      vm.loader = null
                     }
                   }
                 }
@@ -390,59 +500,71 @@ export default {
               })
 
             }else{ //already there , Remove
-              console.log("Remove")
+              //console.log("Remove")
 
                 //remove Uid
                 db.ref('trueCount/' + '/' + k + '/' +
                   vm.$store.state.userDetail.uid).remove()
                   .then(function(){
 
-                  let trueCountInDb
-                  db.ref('trueCount/' + '/' + k + '/' + 'trueCountNo').once('value', function(snapshot){
-                    console.log("True Count No: "+snapshot.val())
-                    trueCountInDb = snapshot.val() - 1
+                    let trueCountInDb
+                    db.ref('trueCount/' + '/' + k + '/' + 'trueCountNo')
+                    .once('value', function(snapshot){
+                      console.log("True Count No: "+snapshot.val())
+                      trueCountInDb = snapshot.val() - 1
 
-                    // count --
-                    db.ref('trueCount/' + '/' + k + '/' +
-                        'trueCountNo').set(trueCountInDb)
+                      // count --
+                      db.ref('trueCount/' + '/' + k + '/' +
+                          'trueCountNo').set(trueCountInDb)
 
-                    //trueButtonColorGrey
-                    for(let z in vm.news_arr){
-                      //console.log(vm.news_arr[z]) //2 -> top & latest
-                      for(let z1 in vm.news_arr[z].articles){
-                        //console.log(vm.news_arr[z].articles[z1])
-                        if(vm.news_arr[z].articles[z1].k == k){
-                          //console.log(k +":" vm.news_arr[z].articles[z1].isTrueStatusInDb)
-                          if(vm.news_arr[z].articles[z1].isTrueStatusInDb == 'grey'){
-                            vm.news_arr[z].articles[z1].isTrueStatusInDb = 'blue'
-                          }else if(vm.news_arr[z].articles[z1].isTrueStatusInDb == 'blue'){
-                            vm.news_arr[z].articles[z1].isTrueStatusInDb = 'grey'
+                      //trueButtonColorGrey
+                      for(let z in vm.news_arr){
+                        //console.log(vm.news_arr[z]) //2 -> top & latest
+                        for(let z1 in vm.news_arr[z].articles){
+                          //console.log(vm.news_arr[z].articles[z1])
+                          if(vm.news_arr[z].articles[z1].k == k){
+                            //console.log(k +":" vm.news_arr[z].articles[z1].isTrueStatusInDb)
+                            if(vm.news_arr[z].articles[z1].isTrueStatusInDb == 'grey'){
+                              vm.news_arr[z].articles[z1].isTrueStatusInDb = 'blue'
+                            }else if(vm.news_arr[z].articles[z1].isTrueStatusInDb == 'blue'){
+                              vm.news_arr[z].articles[z1].isTrueStatusInDb = 'grey'
+                            }
+                            vm.news_arr[z].articles[z1].trueCountValue = trueCountInDb
+
+                            //button preloader ends
+                            vm[l] = false
+                            vm.loader = null
                           }
                         }
                       }
-                    }
 
                   })
                 })
             }
         })
+      }else{
+        //user is not logged in 
       }
 
     },
+
+    //load more
     loadMore(id, k){
       //console.log(id)
       if(id == 'top'){
         //console.log("top")
-        console.log(k)
+        //console.log(k)
         this.loadMoreTop(k)
       }else if(id == 'latest'){
         //console.log("latest")
         this.loadMoreLatest(k)
       }
     },
+
+    //loadMoreTop
     loadMoreTop(key){
       //retriev from firebase
-      console.log(key)
+      //console.log(key)
       //console.log(this)
       let vueRef=this
       db.ref('top/').orderByKey().endAt(key).limitToLast(4).on('value',function(snapshot){
@@ -469,20 +591,34 @@ export default {
               }
               //console.log(k2)
 
-              //pack
-              let topObj = {
-                k:k2,
-                a,
-                isTrueStatusInDb
-              }
-              //console.log(topObj)
-              //console.log(vueRef.news_arr)
-              vueRef.news_arr[0].articles.push(topObj)
+              //trueCount
+              db.ref('trueCount/'+k2+'/'+
+                'trueCountNo').once('value',function(snapshot3){
+                //console.log(vm.news_arr[z].articles[z1].k+ " " +snapshot.val())
+                let trueCountValue = snapshot3.val()
+
+                //logic
+                if(trueCountValue == null)
+                  trueCountValue = 0
+
+                //pack
+                let topObj = {
+                  k:k2,
+                  a,
+                  isTrueStatusInDb,
+                  trueCountValue
+                }
+                //console.log(topObj)
+                //console.log(vueRef.news_arr)
+                vueRef.news_arr[0].articles.push(topObj)
+            })
           })
 
         }
       })
     },
+
+    //loadMoreLatest
     loadMoreLatest(key){
       //retriev from firebase
       console.log(key)
@@ -512,78 +648,90 @@ export default {
               }
               //console.log(k2)
 
-              //pack
-              let latestObj = {
-                k:k2,
-                a,
-                isTrueStatusInDb
-              }
+              //trueCount
+              db.ref('trueCount/'+k2+'/'+
+                'trueCountNo').once('value',function(snapshot3){
+                //console.log(vm.news_arr[z].articles[z1].k+ " " +snapshot.val())
+                let trueCountValue = snapshot3.val()
 
-              //push
-              //console.log(vueRef.news_arr)
-              vueRef.news_arr[1].articles.push(latestObj)
+                //logic
+                if(trueCountValue == null)
+                  trueCountValue = 0
+
+                //pack
+                let latestObj = {
+                  k:k2,
+                  a,
+                  isTrueStatusInDb,
+                  trueCountValue
+                }
+
+                //push
+                //console.log(vueRef.news_arr)
+                vueRef.news_arr[1].articles.push(latestObj)
+            })
           })
 
         }
 
       })
-    }
+    },
+
   },
+
+  //firebase
   firebase: {
 
   },
+
+  //computed
   computed:{
+
+    //mapGetters
     ...mapGetters([
       'isLoggedIn'
     ]),
-    queryTrueCount(){
-      let vm = this
 
-      //trueButtonColorGrey
-      for(let z in vm.news_arr){
-        //console.log(vm.news_arr[z]) //2 -> top & latest
-        for(let z1 in vm.news_arr[z].articles){
-          //console.log(vm.news_arr[z].articles[z1])
-          //console.log(vm.news_arr[z].articles[z1].k)
-          db.ref('trueCount/'+vm.news_arr[z].articles[z1].k+'/'+
-            'trueCountNo').on('value',function(snapshot){
-            //console.log(vm.news_arr[z].articles[z1].k+ " " +snapshot.val())
-            let trueCountValue = snapshot.val()
-            if(trueCountValue == null)
-              trueCountValue = 0
-            vm.news_arr[z].articles[z1].trueCountValue = trueCountValue //**Print
-            console.log(vm.news_arr[z].articles[z1].trueCountValue)
-          })
-        }
-      }
-      //console.log("**************************")
-      return
-    }
   },
+
+  //beforeMount
   beforeMount(){
     this.getNews()
-    setTimeout(() => (this.dialog =! this.dialog), 7000)
 
   },
+
+  //mounted
   mounted(){
 
   },
-  watch: {
+
+  //watch
+/*  watch: {
     loader () {
       const l = this.loader
+      console.log("l1=> " + l)
+
+      console.log("this[l]1=> " + this[l])
       this[l] = !this[l]
-      setTimeout(() => (this[l] = false), 1000)
+      console.log("this[l]2=> " + this[l])
+
+      setTimeout(() => (this[l] = false), 2000)
+      console.log("this[l]3=> " + this[l])
+
       this.loader = null
+      console.log("l2=> " + l)
     }
-  },
+  },*/
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+
 .title{
   font-size:20px;
 }
+
 .logInBut{
   margin-top:-3%;
   font-size:12px;
@@ -591,29 +739,36 @@ export default {
   height:24px;
   margin-left:13%;
 }
+
 .logInBut >.btn__content{
   padding:0 8px 0px 3px;
   background:#3F51B5;
 }
+
 .headline-dialog{
   font-size:14px ! important;
 }
+
 .dialog-header-home{
   margin-left:20%;
 }
+
 .layout .flex {
     padding-right: 0px;
     padding-left: 0px;
 }
+
 .load-more-but{
   height:28px;
   text-transform: inherit;
 }
+
 .auth_but{
   font-size:12px;
   text-transform: inherit;
     height: 30px;
 }
+
 .true-value-count{
 
   width:18px;
@@ -622,13 +777,16 @@ export default {
   border-radius:50px;
   margin-right:5px;
 }
+
 .trueCountText{
   color:green;
   margin-left:5px;
 }
+
 .chip-auth{
     margin: 8px 0px;
 }
+
 .thmb-icon{
   font-size:12px;
 }
@@ -639,7 +797,5 @@ export default {
   right: 20px;
   z-index:10;
 }
-
-
 
 </style>
