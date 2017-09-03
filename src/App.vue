@@ -50,7 +50,7 @@
           <v-list-tile-content >
 
             <!-- logout button/name in drawer-->
-            <v-list-tile-title @click="fbLogOut"
+            <v-list-tile-title @click="fbLogOut();drawer=!drawer"
               class="logOutBut">Log Out</v-list-tile-title>
 
           </v-list-tile-content>
@@ -60,7 +60,9 @@
           <v-flex xs8 offset-xs2>
 
             <!-- not in tiel=> login button to avoid whole ripple-->
-            <v-btn transparent dark @click="fbLogIn" v-show="!isLoggedIn"
+            <v-btn transparent dark
+              @click="fbLogIn();drawer=!drawer"
+              v-show="!isLoggedIn"
               class="logInBut"><img src="https://png.icons8.com/facebook/color/24"
               title="Facebook" width="24" height="24">Sign In with Facebook
             </v-btn>
@@ -73,7 +75,7 @@
 
 
     <!-- header -->
-    <v-toolbar fixed class="deep-orange" dark>
+    <v-toolbar fixed class="deep-orange" dark id="app-nav">
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title class="app-title">VOICE OF NATION</v-toolbar-title>
     </v-toolbar>
@@ -121,6 +123,7 @@ Firebase.auth().onAuthStateChanged(function(user) {
   }
 });
 
+
 export default {
   name: 'app',
 
@@ -156,5 +159,4 @@ export default {
 </script>
 
 <style>
-
 </style>

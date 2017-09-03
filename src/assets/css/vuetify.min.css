@@ -9,7 +9,7 @@ body {
   font-size:16px
 }
 .notLoggedIn{
-  font-size:14px
+  font-size:13px
 }
 .logOutBut{
   margin-top:4px
@@ -30,7 +30,7 @@ body {
     border-color: #ff5722!important;
 }
 .cyan {
-    background-color: #8D6E63 ! important;
+    background-color: #616161 ! important;
     border-color: #00bcd4!important;
 }
 .tabs__items {
@@ -39,4 +39,11 @@ body {
     border-style: hidden;
     border-color: rgba(0,0,0,.1);
     overflow: hidden;
+}
+.btn__content {
+  padding: 0 0px;
+}
+.chip {
+    font-size: 11px;
+    height: 27px;
 }

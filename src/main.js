@@ -10,7 +10,6 @@ import Vuetify from 'vuetify'
 import {store} from './store'
 import VueResource from 'vue-resource'
 
-
 Vue.use(VueFire)
 Vue.use(Vuetify)
 Vue.use(VueResource)
