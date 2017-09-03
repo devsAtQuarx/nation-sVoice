@@ -1,13 +1,16 @@
 <template>
-  <span id="main-home">
-
-    <!-- scrollToTop -->
-    <v-btn fab dark class="feedback indigo" @click="scrollToTop()">
-      <i class="material-icons">&#xE5CE;</i>
-    </v-btn>
+  <span id="main-home" >
 
     <!-- TabComponent -->
-    <v-tabs dark fixed centered id='home' v-if="news_arr.length >=2" >
+    <v-tabs
+    dark fixed centered id='home'
+    v-if="showAllNews"
+    >
+
+      <!-- scrollToTop -->
+      <v-btn fab dark class="feedback blue-grey" @click="scrollToTop()">
+        <i class="material-icons">&#xE5CE;</i>
+      </v-btn>
 
       <!-- tab selector -->
       <v-tabs-bar slot="activators" class="cyan">
@@ -28,8 +31,10 @@
         :key="i.id"
         :id="'tab-' + i.id"
       >
+
         <!-- news cardd -->
         <v-layout v-for="(j,index_articles) in i.articles" >
+
           <v-flex xs12 sm8 offset-sm2 >
             <v-card>
 
@@ -48,7 +53,7 @@
 
                   <div>
                     <span class="true-value-count" v-if="j.trueCountValue!=null">
-                        <v-chip outline class="grey black--text chip-auth">
+                        <v-chip outline class="grey secondary--text chip-auth">
                             Authenticated by
                             <span class="trueCountText">
 
@@ -72,11 +77,14 @@
                 </div>
               </v-card-title>
 
+              <v-divider></v-divider>
               <!--card footer-->
               <v-card-actions>
 
                 <!-- auth but -->
                 <v-btn
+                  fab small dark
+
                   :loading="loading"
 
                   @click.native.stop=
@@ -85,28 +93,33 @@
                       trueCount(i.id, j.k)"
 
 
-                  class="primary dark white--text auth_but"
+                  class=""
                   :class="j.isTrueStatusInDb"
                 >
 
                   <!-- show grey but -->
-                  <span v-if="j.isTrueStatusInDb=='grey'">
-                    Authenticate
-                    <i class="material-icons thmb-icon" >&#xE8DC;</i>
-                  </span>
+                  <v-icon
+                    dark
+                    v-if="j.isTrueStatusInDb=='grey'"
+                    style="font-size:24px;font-weight:600">
+                    check
+                  </v-icon>
 
                   <!-- show blue but-->
-                  <span v-if="j.isTrueStatusInDb=='blue'">
-                    Authenticated by You
-                    <i class="material-icons thmb-icon" >&#xE8DC;</i>
-                  </span>
+                  <v-icon
+                    dark
+                    v-if="j.isTrueStatusInDb=='blue'"
+                    style="font-size:24px;font-weight:600">
+                    check
+                  </v-icon>
 
                 </v-btn>
 
+                <v-spacer></v-spacer>
                 <!--see detail button -->
-                <v-btn flat class="orange--text auth_but" :href="j.a.url" >
+                <v-btn flat class="orange--text seeDetail_but" :href="j.a.url" >
                   See Detail
-                  <i class="material-icons">&#xE315;</i>
+                  <i class="material-icons" style="font-size:20px;margin-top:1px">&#xE315;</i>
                 </v-btn>
 
               </v-card-actions>
@@ -118,16 +131,23 @@
         </v-layout><!-- newscard ends -->
 
         <!-- load more but => top -->
-        <v-btn block secondary dark v-show="i.id=='top'"
-          @click="loadMore(i.id, i.articles[c].k); c+=3" class="load-more-but">
+        <v-btn block secondary dark
+          v-show="i.id=='top'"
+          :loading="loading3"
+          @click.native="loader = 'loading3';loadMore(i.id, i.articles[c].k)"
+          class="load-more-but"
+        >
           <span  >
             Load More ...
           </span>
         </v-btn>
 
+
         <!-- load more but => latest -->
         <v-btn block secondary dark v-show="i.id=='latest'"
-          @click="loadMore(i.id, i.articles[c2].k); c2+=3" class="load-more-but">
+        :loading="loading3"
+          @click.native="loader = 'loading3';loadMore(i.id, i.articles[c2].k);"
+           class="load-more-but">
           <span  >
             Load More ...
           </span>
@@ -174,6 +194,12 @@
       </v-dialog>
 
     </v-tabs>
+
+
+    <v-progress-circular v-else indeterminate v-bind:size="50" v-bind:width="5"
+      class="grey--text">
+    </v-progress-circular>
+
   </span>
 </template>
 
@@ -182,6 +208,7 @@
 import {db} from '../firebase'
 import {mapMutations} from 'vuex'
 import {mapGetters} from 'vuex'
+
 
 export default {
   name: 'home',
@@ -195,9 +222,11 @@ export default {
       dialog: false,
       loader: null,
       loading: false,
+      scroll_flg : false,
+      loading3: false,
+      showAllNews:true
     }
   },
-
 
   //methods
   methods:{
@@ -214,6 +243,9 @@ export default {
 
     //getNews
     getNews(){
+
+      let vm = this
+      this.showAllNews = false
 
       //*************TopNews************/
       this.$http.get('https://newsapi.org/v1/articles?source=the-times-of-india&sortBy=top&apiKey=b0a290260ac4478c98e35da0f5ca7d4a')
@@ -274,7 +306,7 @@ export default {
 
           //retrievLatest
           this.retrieveLatest()
-
+          setTimeout(function(){ vm.showAllNews = true }, 3000);
         })
 
 
@@ -550,19 +582,27 @@ export default {
 
     //load more
     loadMore(id, k){
+
       //console.log(id)
       if(id == 'top'){
         //console.log("top")
         //console.log(k)
         this.loadMoreTop(k)
+        this.c+=3
       }else if(id == 'latest'){
         //console.log("latest")
         this.loadMoreLatest(k)
+        this.c2+=3
       }
     },
 
     //loadMoreTop
     loadMoreTop(key){
+
+      //
+      const l = this.loader
+      this[l] = !this[l]
+
       //retriev from firebase
       //console.log(key)
       //console.log(this)
@@ -611,6 +651,8 @@ export default {
                 //console.log(topObj)
                 //console.log(vueRef.news_arr)
                 vueRef.news_arr[0].articles.push(topObj)
+                vueRef[l] = false
+                vueRef.loader = null
             })
           })
 
@@ -620,6 +662,11 @@ export default {
 
     //loadMoreLatest
     loadMoreLatest(key){
+
+      //
+      const l = this.loader
+      this[l] = !this[l]
+
       //retriev from firebase
       console.log(key)
       //console.log(this)
@@ -669,6 +716,8 @@ export default {
                 //push
                 //console.log(vueRef.news_arr)
                 vueRef.news_arr[1].articles.push(latestObj)
+                vueRef[l] = false
+                vueRef.loader = null
             })
           })
 
@@ -683,6 +732,7 @@ export default {
   firebase: {
 
   },
+
 
   //computed
   computed:{
@@ -759,12 +809,15 @@ export default {
 }
 
 .load-more-but{
-  height:28px;
+  height:36px;
   text-transform: inherit;
+  background: #546E7A!important;
+  font-size: 13px;
+  font-weight: 300;
 }
 
-.auth_but{
-  font-size:12px;
+.seeDetail_but{
+  font-size:13px;
   text-transform: inherit;
     height: 30px;
 }
@@ -779,7 +832,7 @@ export default {
 }
 
 .trueCountText{
-  color:green;
+  color:#2196f3;
   margin-left:5px;
 }
 
