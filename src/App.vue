@@ -77,7 +77,7 @@
     <!-- header -->
     <v-toolbar fixed class="deep-orange" dark id="app-nav">
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-      <v-toolbar-title class="app-title">VOICE OF NATION</v-toolbar-title>
+      <v-toolbar-title class="app-title">NATION'S VOICE</v-toolbar-title>
     </v-toolbar>
 
 
