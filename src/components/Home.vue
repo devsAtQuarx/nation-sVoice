@@ -1,5 +1,5 @@
 <template>
-  <span id="main-home" >
+  <div id="main-home" >
 
     <!-- TabComponent -->
     <v-tabs
@@ -30,6 +30,10 @@
         v-for="(i,index_new_arr) in news_arr"
         :key="i.id"
         :id="'tab-' + i.id"
+        v-touch="{
+          left: () => swipe('Left'),
+          right: () => swipe('Right')
+        }"
       >
 
         <!-- news cardd -->
@@ -196,11 +200,9 @@
     </v-tabs>
 
 
-    <v-progress-circular v-else indeterminate v-bind:size="50" v-bind:width="5"
-      class="grey--text">
-    </v-progress-circular>
+    <div class="preloader-init" v-else></div>
 
-  </span>
+  </div>
 </template>
 
 
@@ -224,7 +226,8 @@ export default {
       loading: false,
       scroll_flg : false,
       loading3: false,
-      showAllNews:true
+      showAllNews:true,
+      swipeDirection: 'None'
     }
   },
 
@@ -235,6 +238,20 @@ export default {
     ...mapMutations([
       'fbLogIn','fbLogOut'
     ]),
+
+    //swipe - to be done later
+    swipe (direction) {
+      this.swipeDirection = direction
+      //console.log(this.swipeDirection)
+
+      if(this.swipeDirection == 'Left'){
+        //console.log('left')
+
+      }else if(this.swipeDirection == 'Right'){
+        //console.log('right')
+
+      }
+    },
 
     //scrollToTop
     scrollToTop(){
@@ -849,6 +866,23 @@ export default {
   bottom: 20px;
   right: 20px;
   z-index:10;
+}
+
+.preloader-init {
+  position: absolute;
+  top: 58%;
+  left: 49%;
+  width: 40px;
+  height: 40px;
+  margin: -42px 0 0 -12px;
+  background: #616161;
+  transform: rotate(45deg);
+  animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+	0% { -webkit-transform:rotate(0deg); }
+	100% { -webkit-transform:rotate(360deg); }
 }
 
 </style>
