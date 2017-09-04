@@ -804,7 +804,7 @@ export default {
   font-size:12px;
   text-transform: inherit;
   height:24px;
-  margin-left:13%;
+  margin-left:15%;
 }
 
 .logInBut >.btn__content{
@@ -817,7 +817,7 @@ export default {
 }
 
 .dialog-header-home{
-  margin-left:20%;
+  margin-left:19%;
 }
 
 .layout .flex {

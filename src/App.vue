@@ -38,13 +38,16 @@
       <v-divider></v-divider>
 
       <v-list class="pt-0" dense >
+
         <!-- list in drawer-->
         <v-list-tile v-show="isLoggedIn">
-          <v-list-tile-action>
+          <v-list-tile-action >
 
             <!-- logout icon -->
-            <img v-show="isLoggedIn" src="https://png.icons8.com/exit/ios7/25"
-              title="Exit" width="16" height="16">
+            <v-list-tile-title @click="fbLogOut();drawer=!drawer">
+              <img v-show="isLoggedIn" src="https://png.icons8.com/exit/ios7/25"
+                title="Exit" width="16" height="16">
+            </v-list-tile-title>
 
           </v-list-tile-action>
           <v-list-tile-content >
